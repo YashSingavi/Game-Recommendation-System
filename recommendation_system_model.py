@@ -140,22 +140,29 @@ def get_similar_games(game_id, tfidf, games_data, n_neighbors=6):
 def recommend_games(user_id):
     similar_users = get_similar_users(user_id, user_user_matrix, knn_model)
     similar_games = {}
+    
+    # Loop through similar users
     for user in similar_users:
         user_games = recommendations_df[recommendations_df['user_id'] == user]['app_id'].unique()
+        
+        # Loop through each game of the similar user
         for game_id in user_games:
             similar_games.setdefault(game_id, 0)
+            
+            # Get similar games for each game of the similar user
             for game, similarity in get_similar_games(game_id, tf, games_df):
-                similar_games[game_id] += similarity
+                # Update the similarity score for the game
+                similar_games[game] += similarity
     
-    recommended_games = []
-    for game_id, score in similar_games.items():
-        # Check if the game ID exists in games_df
-        if game_id in games_df['app_id'].values:
-            game_title = games_df.loc[games_df['app_id'] == game_id, 'title'].iloc[0]
-            recommended_games.append((game_title, score))
+    # Filter out the games already played by the user
+    played_games = recommendations_df[recommendations_df['user_id'] == user_id]['app_id'].unique()
+    similar_games = {game_id: score for game_id, score in similar_games.items() if game_id not in played_games}
     
-    recommended_games = sorted(recommended_games, key=lambda x: x[1], reverse=True)[:5]
+    # Sort the games by similarity score and get top 5 recommendations
+    recommended_games = sorted(similar_games.items(), key=lambda x: x[1], reverse=True)[:5]
+    
     return recommended_games
+
 
 
 # Initialize session state
