@@ -162,9 +162,13 @@ def recommend_games(user_id):
     sorted_games = sorted(similar_games.items(), key=lambda x: x[1], reverse=True)[:5]
     
     # Get game titles from game IDs
-    recommended_games = [(games_df[games_df['app_id'] == game_id]['title'].iloc[0], score) for game_id, score in sorted_games]
+    recommended_games = []
+    for game_id, score in sorted_games:
+        game_title = games_df.loc[games_df['app_id'] == game_id, 'title'].iloc[0] if game_id in games_df['app_id'].values else "Game Title Not Found"
+        recommended_games.append((game_title, score))
     
     return recommended_games
+
 
 
 
@@ -187,9 +191,6 @@ if st.button("Recommend Games"):
     else:
         st.warning("No games found for recommendation.")
 
-
-
-
 st.write('\n')
 st.write('\n')
 
@@ -200,6 +201,6 @@ selected_game_title = st.selectbox("Select a game to recommend 5 games for it:",
 if selected_game_title:
     selected_game_index = recommended_game_titles.index(selected_game_title)
     st.write(f"<p class='top-recommendation-header'>Top 5 recommended games for {selected_game_title}:</p>", unsafe_allow_html=True)
-    similar_games = recommend_games(selected_game_index)
+    similar_games = recommend_games(user_id)  # Changed to user_id
     for game_title, _ in similar_games[:5]:
         st.write(f"<p class='recommended-game'>• {game_title}</p>", unsafe_allow_html=True)
