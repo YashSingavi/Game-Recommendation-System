@@ -101,6 +101,7 @@ def get_similar_games(game_id, tfidf_matrix, n_neighbors=6):
     return similar_games
 
 # Function to recommend games
+# Function to recommend games
 def recommend_games(user_id):
     similar_users = get_similar_users(user_id, user_user_matrix, knn_model)
     similar_games = {}
@@ -115,6 +116,7 @@ def recommend_games(user_id):
                 else:
                     similar_games[game] += similarity
     return sorted(similar_games.items(), key=lambda x: x[1], reverse=True)[:5]
+
 
 # Building user-user recommendation model
 unique_user_ids = recommendations_df['user_id'].unique()
