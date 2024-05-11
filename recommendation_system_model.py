@@ -176,10 +176,10 @@ if st.button("Recommend Games"):
 
     recommended_games = recommend_games(user_id)
     if recommended_games:
-    st.session_state.recommended_games = recommended_games
-    st.markdown(f"<p class='top-recommendation-header'>Recommended Games for User ID {user_id}:</p>", unsafe_allow_html=True)
-    for game in recommended_games:
-        st.markdown(f"<p class='recommended-game'>• {game[0]}</p>", unsafe_allow_html=True)
+        st.session_state.recommended_games = recommended_games
+        st.markdown(f"<p class='top-recommendation-header'>Recommended Games for User ID {user_id}:</p>", unsafe_allow_html=True)
+        for game in recommended_games:
+            st.markdown(f"<p class='recommended-game'>• {game[0]}</p>", unsafe_allow_html=True)
 else:
     st.markdown("<p class='warning-text'>No games found for recommendation.</p>", unsafe_allow_html=True)
 
