@@ -173,6 +173,7 @@ def recommend_games(user_id):
 
 
 
+
 # Initialize session state
 if 'recommended_games' not in st.session_state:
     st.session_state.recommended_games = []
@@ -199,8 +200,12 @@ recommended_game_titles = [game[0] for game in st.session_state.recommended_game
 selected_game_title = st.selectbox("Select a game to recommend 5 games for it:", recommended_game_titles, index=0, key="game_dropdown")
 
 if selected_game_title:
-    selected_game_index = recommended_game_titles.index(selected_game_title)
-    st.write(f"<p class='top-recommendation-header'>Top 5 recommended games for {selected_game_title}:</p>", unsafe_allow_html=True)
-    similar_games = recommend_games(user_id)  # Changed to user_id
-    for game_title, _ in similar_games[:5]:
-        st.write(f"<p class='recommended-game'>• {game_title}</p>", unsafe_allow_html=True)
+    selected_game_index = recommended_game_titles.index(selected_game_title) if selected_game_title in recommended_game_titles else -1
+    if selected_game_index >= 0:
+        st.write(f"<p class='top-recommendation-header'>Top 5 recommended games for {selected_game_title}:</p>", unsafe_allow_html=True)
+        similar_games = recommend_games(selected_game_index)  # Pass selected_game_index instead of user_id
+        for game_title, _ in similar_games[:5]:
+            st.write(f"<p class='recommended-game'>• {game_title}</p>", unsafe_allow_html=True)
+    else:
+        st.warning("Selected game title not found.")
+
