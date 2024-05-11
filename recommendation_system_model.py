@@ -201,6 +201,9 @@ selected_game_title = st.selectbox("Select a game to recommend 5 games for it:",
 
 if selected_game_title:
     selected_game_index = recommended_game_titles.index(selected_game_title) if selected_game_title in recommended_game_titles else -1
+    st.write(f"Selected Game Title: {selected_game_title}")
+    st.write(f"Selected Game Index: {selected_game_index}")
+    st.write(f"Recommended Game Titles: {recommended_game_titles}")
     if selected_game_index >= 0:
         st.write(f"<p class='top-recommendation-header'>Top 5 recommended games for {selected_game_title}:</p>", unsafe_allow_html=True)
         similar_games = recommend_games(selected_game_index)  # Pass selected_game_index instead of user_id
@@ -208,4 +211,5 @@ if selected_game_title:
             st.write(f"<p class='recommended-game'>• {game_title}</p>", unsafe_allow_html=True)
     else:
         st.warning("Selected game title not found.")
+
 
