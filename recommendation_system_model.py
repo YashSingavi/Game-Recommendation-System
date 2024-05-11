@@ -114,14 +114,7 @@ st.write('\n')
 
 # Function to get similar users
 def get_similar_users(user_id, user_user_matrix, knn_model, n_neighbors=6):
-    if user_id not in user_id_indices:
-        return []  # Invalid user ID
-    
-    user_index = user_id_indices[user_id]
-    if user_index >= user_user_matrix.shape[0]:
-        return []  # User ID out of bounds
-    
-    distances, indices = knn_model.kneighbors(user_user_matrix.getrow(user_index), n_neighbors=n_neighbors)
+    distances, indices = knn_model.kneighbors(user_user_matrix.getrow(user_id), n_neighbors=n_neighbors)
     similar_users = [unique_user_ids[i] for i in indices.flatten()[1:]]
     return similar_users
 
