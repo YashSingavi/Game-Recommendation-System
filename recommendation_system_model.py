@@ -114,59 +114,55 @@ st.write('\n')
 
 # Function to get similar users
 def get_similar_users(user_id, user_user_matrix, knn_model, n_neighbors=6):
-    distances, indices = knn_model.kneighbors(user_user_matrix.getrow(user_id), n_neighbors=n_neighbors)
+    if user_id not in user_id_indices:
+        return []  # Invalid user ID
+    
+    user_index = user_id_indices[user_id]
+    if user_index >= user_user_matrix.shape[0]:
+        return []  # User ID out of bounds
+    
+    distances, indices = knn_model.kneighbors(user_user_matrix.getrow(user_index), n_neighbors=n_neighbors)
     similar_users = [unique_user_ids[i] for i in indices.flatten()[1:]]
     return similar_users
 
 
 # Function to get similar games
-def get_similar_games(game_id, tfidf_matrix, n_neighbors=6):
+def get_similar_games(game_id, tfidf, games_data, n_neighbors=6):
     game_index = np.where(unique_game_ids == game_id)[0]
     if len(game_index) == 0:
         return []
     game_index = game_index[0]
+    
+    # Fill NaN values in game titles with empty strings
+    cleaned_titles = games_data['title'].fillna('')
+    
+    tfidf_matrix = tfidf.fit_transform(cleaned_titles)
+    
     cosine_similarities = linear_kernel(tfidf_matrix[game_index], tfidf_matrix).flatten()
     cosine_similarities = cosine_similarities.squeeze()  # Squeeze to remove extra dimension
     similar_indices = cosine_similarities.argsort()[:-n_neighbors-1:-1]
-    similar_games = [(games_df['title'].iloc[i], cosine_similarities[i]) for i in similar_indices if i != game_index]
+    similar_games = [(cleaned_titles.iloc[i], cosine_similarities[i]) for i in similar_indices if i != game_index]
     return similar_games
 
-# Function to recommend games
 def recommend_games(user_id):
     similar_users = get_similar_users(user_id, user_user_matrix, knn_model)
     similar_games = {}
     for user in similar_users:
         user_games = recommendations_df[recommendations_df['user_id'] == user]['app_id'].unique()
         for game_id in user_games:
-            for game, similarity in get_similar_games(game_id, tfidf_matrix):
-                if game not in similar_games:
-                    similar_games[game] = similarity
-                else:
-                    similar_games[game] += similarity
-    return sorted(similar_games.items(), key=lambda x: x[1], reverse=True)[:5]
-
-# Building user-user recommendation model
-unique_user_ids = recommendations_df['user_id'].unique()
-unique_app_ids = recommendations_df['app_id'].unique()
-
-user_id_indices = {id: index for index, id in enumerate(unique_user_ids)}
-app_id_indices = {id: index for index, id in enumerate(unique_app_ids)}
-
-user_indices = [user_id_indices[user_id] for user_id in recommendations_df['user_id']]
-app_indices = [app_id_indices[app_id] for app_id in recommendations_df['app_id']]
-hours = recommendations_df['hours'].tolist()
-
-user_user_matrix = coo_matrix((hours, (user_indices, app_indices)), shape=(len(unique_user_ids), len(unique_app_ids)))
-
-knn_model = NearestNeighbors(metric='cosine', algorithm='brute')
-knn_model.fit(user_user_matrix)
-
-# Building game-game recommendation model
-tf = TfidfVectorizer(analyzer='word', ngram_range=(1, 3), min_df=1, stop_words='english')
-tfidf_matrix = tf.fit_transform(games_df['title'])
-cosine_similarities = linear_kernel(tfidf_matrix, tfidf_matrix)
-
-unique_game_ids = games_df['app_id'].astype('category').cat.categories
+            similar_games.setdefault(game_id, 0)
+            for game, similarity in get_similar_games(game_id, tf, games_df):
+                similar_games[game_id] += similarity
+    
+    recommended_games = []
+    for game_id, score in similar_games.items():
+        # Check if the game ID exists in games_df
+        if game_id in games_df['app_id'].values:
+            game_title = games_df.loc[games_df['app_id'] == game_id, 'title'].iloc[0]
+            recommended_games.append((game_title, score))
+    
+    recommended_games = sorted(recommended_games, key=lambda x: x[1], reverse=True)[:5]
+    return recommended_games
 
 
 # Initialize session state
@@ -175,9 +171,7 @@ if 'recommended_games' not in st.session_state:
 
 # Recommending games for a specific user
 user_id = st.number_input("Enter User ID:", min_value=1, max_value=users_df['user_id'].max(), value=1, step=1)
-
 if st.button("Recommend Games"):
-
     recommended_games = recommend_games(user_id)
     if recommended_games:
         st.session_state.recommended_games = recommended_games
@@ -185,7 +179,7 @@ if st.button("Recommend Games"):
         for game in recommended_games:
             st.write(f"<p class='recommended-game'>• {game[0]}</p>", unsafe_allow_html=True)
     else:
-        st.warning("<p class='warning-text'>No games found for recommendation.</p>", unsafe_allow_html=True)
+        st.markdown("<p class='warning-text'>No games found for recommendation.</p>")
 
 st.write('\n')
 st.write('\n')
