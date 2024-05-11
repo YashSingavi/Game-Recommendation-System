@@ -171,7 +171,9 @@ if 'recommended_games' not in st.session_state:
 
 # Recommending games for a specific user
 user_id = st.number_input("Enter User ID:", min_value=1, max_value=users_df['user_id'].max(), value=1, step=1)
+
 if st.button("Recommend Games"):
+
     recommended_games = recommend_games(user_id)
     if recommended_games:
         st.session_state.recommended_games = recommended_games
@@ -179,7 +181,7 @@ if st.button("Recommend Games"):
         for game in recommended_games:
             st.write(f"<p class='recommended-game'>• {game[0]}</p>", unsafe_allow_html=True)
     else:
-        st.markdown("<p class='warning-text'>No games found for recommendation.</p>")
+        st.warning("<p class='warning-text'>No games found for recommendation.</p>", unsafe_allow_html=True)
 
 st.write('\n')
 st.write('\n')
