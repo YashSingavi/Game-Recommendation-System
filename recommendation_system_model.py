@@ -37,11 +37,18 @@ def get_similar_games(game_id, tfidf_matrix, n_neighbors=6):
     if len(game_index) == 0:
         return []
     game_index = game_index[0]
+    
+    # Replace np.nan values with empty strings in game titles
+    cleaned_titles = games_df['title'].fillna('')
+    
+    tfidf_matrix = tf.fit_transform(cleaned_titles)
+    
     cosine_similarities = linear_kernel(tfidf_matrix[game_index], tfidf_matrix).flatten()
     cosine_similarities = cosine_similarities.squeeze()  # Squeeze to remove extra dimension
     similar_indices = cosine_similarities.argsort()[:-n_neighbors-1:-1]
-    similar_games = [(games_df['title'].iloc[i], cosine_similarities[i]) for i in similar_indices if i != game_index]
+    similar_games = [(cleaned_titles.iloc[i], cosine_similarities[i]) for i in similar_indices if i != game_index]
     return similar_games
+
 
 # Function to recommend games
 def recommend_games(user_id):
