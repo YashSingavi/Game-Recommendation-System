@@ -1,3 +1,4 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:cd0946561982bd2dd87df019630e5cb20b94d0797aa22fca00e33fe223e5d314
-size 38
+pandas
+numpy
+scikit-learn
+streamlit
