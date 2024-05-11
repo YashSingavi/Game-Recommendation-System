@@ -105,7 +105,9 @@ def recommend_games(user_id):
     similar_users = get_similar_users(user_id, user_user_matrix, knn_model)
     similar_games = {}
     for user in similar_users:
-        user_games = recommendations_df[recommendations_df['user_id'] == user]['app_id'].unique()
+        user_games_df = recommendations_df[recommendations_df['user_id'] == user]
+        user_games_df = user_games_df.fillna(0)  # Fill NaN values with 0
+        user_games = user_games_df['app_id'].unique()
         for game_id in user_games:
             for game, similarity in get_similar_games(game_id, tfidf_matrix):
                 if game not in similar_games:
