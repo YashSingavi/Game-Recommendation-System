@@ -6,63 +6,6 @@ from sklearn.metrics.pairwise import linear_kernel
 from scipy.sparse import coo_matrix
 import streamlit as st
 
-# Define HTML/CSS style with background image
-from PIL import Image
-#img = Image.open('image.png')
-# Define HTML/CSS style with background image
-html_style = """
-<style>
-    [data-testid="stAppViewContainer"]{
-        background-image: url('https://images.unsplash.com/photo-1482855549413-2a6c9b1955a7?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
-        background-size: cover; 
-        background-position: center;
-        height: 100%;
-    }
-    h1{
-    text-align:center;
-    margin-bottom: 5px; 
-    margin-top: -20px;
-    }
-    }
-    .main-title-2{
-        font-family: 'Poetsen One', sans-serif;
-        margin-bottom: 30px; 
-        margin-top: 10px;
-        text-align: center; 
-        }
-    
-    .recommendation-header {
-        font-family: 'Poetsen One', sans-serif;
-        font-size: 15px;
-    }
-    .recommended-game {
-        font-family: 'Poetsen One', sans-serif;
-        font-size: 16px;
-        margin-left: 20px; /* Add margin for better indentation */
-    }
-    .warning-text {
-        font-family: 'Poetsen One', sans-serif;
-        font-size: 16px;
-        color: red;
-        text-align: center;
-    }
-    .top-recommended-header {
-        font-family: 'Poetsen One', sans-serif;
-        font-size: 15px;   
-    }
-    p {
-    font-size: 18px;
-    }
-</style>
-"""
-
-# Render HTML/CSS style
-st.markdown(html_style, unsafe_allow_html=True)
-
-# Streamlit App
-st.markdown("<h1 class='main-title-2'>Game Recommendation System</h1>", unsafe_allow_html=True)
-st.write('\n')
-st.write('\n')
 # Function to reduce memory usage
 def reduce_memory(df):
     for col in df.columns:
@@ -72,15 +15,15 @@ def reduce_memory(df):
             df[col] = df[col].astype('int32')
     return df
 
-# Function to load dataset in chunks
-def data_generator(df, chunksize=10000):
-    for i in range(0, df.shape[0], chunksize):
-        yield df.iloc[i:i+chunksize]
-
 # Loading datasets
-games_df = reduce_memory(pd.read_csv('games.csv'))
-users_df = reduce_memory(pd.read_csv('users.csv'))
-recommendations_df = reduce_memory(pd.read_csv('recommendations.csv'))
+@st.cache
+def load_data():
+    games_df = reduce_memory(pd.read_csv('games.csv'))
+    users_df = reduce_memory(pd.read_csv('users.csv'))
+    recommendations_df = reduce_memory(pd.read_csv('recommendations.csv'))
+    return games_df, users_df, recommendations_df
+
+games_df, users_df, recommendations_df = load_data()
 
 # Function to get similar users
 def get_similar_users(user_id, user_user_matrix, knn_model, n_neighbors=6):
@@ -136,6 +79,60 @@ tfidf_matrix = tf.fit_transform(games_df['title'])
 cosine_similarities = linear_kernel(tfidf_matrix, tfidf_matrix)
 
 unique_game_ids = games_df['app_id'].astype('category').cat.categories
+
+# Define HTML/CSS style with background image
+html_style = """
+<style>
+    [data-testid="stAppViewContainer"]{
+        background-image: url('https://images.unsplash.com/photo-1482855549413-2a6c9b1955a7?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+        background-size: cover; 
+        background-position: center;
+        height: 100%;
+    }
+    h1{
+    text-align:center;
+    margin-bottom: 5px; 
+    margin-top: -20px;
+    }
+    .main-title-2{
+        font-family: 'Poetsen One', sans-serif;
+        margin-bottom: 30px; 
+        margin-top: 10px;
+        text-align: center; 
+        }
+    
+    .recommendation-header {
+        font-family: 'Poetsen One', sans-serif;
+        font-size: 15px;
+    }
+    .recommended-game {
+        font-family: 'Poetsen One', sans-serif;
+        font-size: 16px;
+        margin-left: 20px; /* Add margin for better indentation */
+    }
+    .warning-text {
+        font-family: 'Poetsen One', sans-serif;
+        font-size: 16px;
+        color: red;
+        text-align: center;
+    }
+    .top-recommended-header {
+        font-family: 'Poetsen One', sans-serif;
+        font-size: 15px;   
+    }
+    p {
+    font-size: 18px;
+    }
+</style>
+"""
+
+# Render HTML/CSS style
+st.markdown(html_style, unsafe_allow_html=True)
+
+# Streamlit App
+st.markdown("<h1 class='main-title-2'>Game Recommendation System</h1>", unsafe_allow_html=True)
+st.write('\n')
+st.write('\n')
 
 # Initialize session state
 if 'recommended_games' not in st.session_state:
