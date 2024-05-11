@@ -32,23 +32,22 @@ def get_similar_users(user_id, user_user_matrix, knn_model, n_neighbors=6):
     return similar_users
 
 # Function to get similar games
-def get_similar_games(game_id, tfidf_matrix, n_neighbors=6):
+def get_similar_games(game_id, tfidf, games_data, n_neighbors=6):
     game_index = np.where(unique_game_ids == game_id)[0]
     if len(game_index) == 0:
         return []
     game_index = game_index[0]
     
-    # Replace np.nan values with empty strings in game titles
-    cleaned_titles = games_df['title'].fillna('')
+    # Fill NaN values in game titles with empty strings
+    cleaned_titles = games_data['title'].fillna('')
     
-    tfidf_matrix = tf.fit_transform(cleaned_titles)
+    tfidf_matrix = tfidf.fit_transform(cleaned_titles)
     
     cosine_similarities = linear_kernel(tfidf_matrix[game_index], tfidf_matrix).flatten()
     cosine_similarities = cosine_similarities.squeeze()  # Squeeze to remove extra dimension
     similar_indices = cosine_similarities.argsort()[:-n_neighbors-1:-1]
     similar_games = [(cleaned_titles.iloc[i], cosine_similarities[i]) for i in similar_indices if i != game_index]
     return similar_games
-
 
 # Function to recommend games
 def recommend_games(user_id):
@@ -57,7 +56,7 @@ def recommend_games(user_id):
     for user in similar_users:
         user_games = recommendations_df[recommendations_df['user_id'] == user]['app_id'].unique()
         for game_id in user_games:
-            for game, similarity in get_similar_games(game_id, tfidf_matrix):
+            for game, similarity in get_similar_games(game_id, tf, games_df):
                 if game not in similar_games:
                     similar_games[game] = similarity
                 else:
