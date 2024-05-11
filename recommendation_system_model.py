@@ -159,9 +159,13 @@ def recommend_games(user_id):
     similar_games = {game_id: score for game_id, score in similar_games.items() if game_id not in played_games}
     
     # Sort the games by similarity score and get top 5 recommendations
-    recommended_games = sorted(similar_games.items(), key=lambda x: x[1], reverse=True)[:5]
+    sorted_games = sorted(similar_games.items(), key=lambda x: x[1], reverse=True)[:5]
+    
+    # Get game titles from game IDs
+    recommended_games = [(games_df[games_df['app_id'] == game_id]['title'].iloc[0], score) for game_id, score in sorted_games]
     
     return recommended_games
+
 
 
 
@@ -173,14 +177,16 @@ if 'recommended_games' not in st.session_state:
 user_id = st.number_input("Enter User ID:", min_value=1, max_value=users_df['user_id'].max(), value=1, step=1)
 
 if st.button("Recommend Games"):
+
     recommended_games = recommend_games(user_id)
     if recommended_games:
         st.session_state.recommended_games = recommended_games
-        st.write(f"<p class='top-recommendation-header'>Recommended Games for User ID {user_id}:</p>", unsafe_allow_html=True)
-        for game in recommended_games:
-            st.write(f"<p class='recommended-game'>• {game[0]}</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='top-recommendation-header'>Recommended Games for User ID {user_id}:</p>", unsafe_allow_html=True)
+        for game, score in recommended_games:
+            st.markdown(f"<p class='recommended-game'>• {game} (Similarity Score: {score:.2f})</p>", unsafe_allow_html=True)
     else:
-        st.warning("<p class='warning-text'>No games found for recommendation.</p>")
+        st.warning("No games found for recommendation.")
+
 
 
 
