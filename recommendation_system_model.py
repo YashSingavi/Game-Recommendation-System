@@ -49,7 +49,6 @@ def get_similar_games(game_id, tfidf, games_data, n_neighbors=6):
     similar_games = [(cleaned_titles.iloc[i], cosine_similarities[i]) for i in similar_indices if i != game_index]
     return similar_games
 
-
 # Function to recommend games
 def recommend_games(user_id):
     similar_users = get_similar_users(user_id, user_user_matrix, knn_model)
