@@ -173,7 +173,7 @@ if st.button("Recommend Games"):
         for game in recommended_games:
             st.write(f"<p class='recommended-game'>• {game[0]}</p>", unsafe_allow_html=True)
     else:
-        st.warning("<p class='warning-text'>No games found for recommendation.</p>", unsafe_allow_html=True)
+        st.warning("<p class='warning-text'>No games found for recommendation.</p>")
 
 
 
