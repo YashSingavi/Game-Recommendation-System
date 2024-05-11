@@ -78,9 +78,9 @@ def data_generator(df, chunksize=10000):
         yield df.iloc[i:i+chunksize]
 
 # Loading datasets
-games_df = reduce_memory(pd.read_csv('/Users/yashsingavi/Desktop/games.csv'))
-users_df = reduce_memory(pd.read_csv('/Users/yashsingavi/Desktop/users.csv'))
-recommendations_df = reduce_memory(pd.read_csv('/Users/yashsingavi/Desktop/recommendations.csv'))
+games_df = reduce_memory(pd.read_csv('games.csv'))
+users_df = reduce_memory(pd.read_csv('users.csv'))
+recommendations_df = reduce_memory(pd.read_csv('recommendations.csv'))
 
 # Function to get similar users
 def get_similar_users(user_id, user_user_matrix, knn_model, n_neighbors=6):
