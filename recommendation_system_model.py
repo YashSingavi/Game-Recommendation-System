@@ -65,7 +65,7 @@ def reduce_memory(df):
     return df
 
 # Loading datasets
-@st.cache
+@st.cache_data
 def load_data():
     games_df = reduce_memory(pd.read_csv('games.csv'))
     users_df = reduce_memory(pd.read_csv('users.csv'))
