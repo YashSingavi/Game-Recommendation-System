@@ -80,7 +80,7 @@ knn_model = NearestNeighbors(metric='cosine', algorithm='brute')
 knn_model.fit(user_user_matrix)
 
 # Building game-game recommendation model
-tf = TfidfVectorizer(analyzer='word', ngram_range=(1, 3), min_df=1, stop_words='english')
+tf = TfidfVectorizer(analyzer='word', ngram_range=(1, 3), min_df=1, stop_words='english', dtype=np.float32)
 tfidf_matrix = tf.fit_transform(games_df['title'])
 cosine_similarities = linear_kernel(tfidf_matrix, tfidf_matrix)
 
