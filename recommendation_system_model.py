@@ -164,7 +164,7 @@ st.write('\n')
 
 # Selecting a game from the recommended games list
 recommended_game_titles = [game[0] for game in st.session_state.recommended_games] if st.session_state.recommended_games else []
-selected_game_title = st.selectbox("Select a game to recommend 5 games for it:", recommended_game_titles, index=0, key="game_dropdown")
+selected_game_title = st.selectbox("Select a game to recommend 3 games for it:", recommended_game_titles, index=0, key="game_dropdown")
 
 if selected_game_title:
     selected_game_index = recommended_game_titles.index(selected_game_title)
